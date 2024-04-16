@@ -4,7 +4,6 @@ import com.testone.customeraccounts.controller.payload.NewAccountPayload;
 import com.testone.customeraccounts.entity.Account;
 import com.testone.customeraccounts.service.AccountService;
 import com.testone.customeraccounts.service.model.AccountMapper;
-import com.testone.customeraccounts.service.model.FindAccountParam;
 import com.testone.customeraccounts.validator.PayloadValidator;
 import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
@@ -19,6 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -43,8 +43,9 @@ class AccountsRestControllerTest {
 
     @Test
     void findAccountByAccountParamThenReturnIterableAccount() {
-        FindAccountParam findParam = new FindAccountParam("Petrov", "Ivan",
-                null, null, null);
+        Map<String, String> findParam = Map.of(
+                "lastName", "Petrov",
+                "firstName", "Ivan");
         Account account1 = Account.of()
                 .id(1l)
                 .lastName("Petrov")
@@ -63,8 +64,9 @@ class AccountsRestControllerTest {
 
     @Test
     void findAccountByAccountParamThenReturnIterableEmpty() {
-        FindAccountParam findParam = new FindAccountParam("Petrov", "Ivan",
-                null, null, null);
+        Map<String, String> findParam = Map.of(
+                "lastName", "Petrov",
+                "firstName", "Ivan");
         doReturn(List.of())
                 .when(this.accountService).findAccountByAccountParam(findParam);
         Iterable<Account> result = this.controller.findAccountByAccountParam(findParam);
@@ -74,7 +76,7 @@ class AccountsRestControllerTest {
     @Test
     void findAccountByAccountParamThenReturnNoSuchException() {
         String messageError = "Поиск осуществляется при наличии хотя бы одного поля.";
-        assertThatThrownBy(() -> this.controller.findAccountByAccountParam(null))
+        assertThatThrownBy(() -> this.controller.findAccountByAccountParam(Map.of()))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining(messageError);
     }

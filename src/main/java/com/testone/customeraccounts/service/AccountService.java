@@ -1,8 +1,8 @@
 package com.testone.customeraccounts.service;
 
 import com.testone.customeraccounts.entity.Account;
-import com.testone.customeraccounts.service.model.FindAccountParam;
 
+import java.util.Map;
 import java.util.Optional;
 
 public interface AccountService {
@@ -11,5 +11,5 @@ public interface AccountService {
 
     Optional<Account> findAccountById(Long id);
 
-    Iterable<Account> findAccountByAccountParam(FindAccountParam findAccountParam);
+    Iterable<Account> findAccountByAccountParam(Map<String, String> findAccountParam);
 }

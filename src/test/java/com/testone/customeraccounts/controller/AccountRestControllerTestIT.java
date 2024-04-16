@@ -1,4 +1,4 @@
-package com.testone.customeraccounts.repository;
+package com.testone.customeraccounts.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

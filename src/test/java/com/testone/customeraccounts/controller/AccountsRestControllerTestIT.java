@@ -26,34 +26,30 @@ public class AccountsRestControllerTestIT {
     @Sql("/sql/accounts_insert.sql")
     void findAccountByAccountParamReturnIterableAccount() throws Exception {
         var requestBuilder = MockMvcRequestBuilders.get("/customer-api/accounts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {"lastName": "Петров", "firstName": "Карп"}
-                        """);
+                .param("lastName", "Петров")
+                .param("firstName", "Карп");
         this.mockMvc.perform(requestBuilder)
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json("""
-                        [{"id":1,"bankId":111111,"lastName":"Петров",
+                        [{"bankId":111111,"lastName":"Петров",
                         "firstName":"Петр","middleName":"Петрович","birthDate":"1975-01-01",
                         "passport":"1111 111111","placeBirth":"г.Калуга","phone":"71001001900",
                         "email":"petrov@mail.ru","addressRegistered":"г.Калуга","addressLife":"г.Калуга"},
-                        {"id":4,"bankId":444444,"lastName":"Карпун",
+                        {"bankId":444444,"lastName":"Карпун",
                         "firstName":"Карп","middleName":"Поликарпович","birthDate":"2004-04-21",
                         "passport":"4444 444444","placeBirth":"г.Майкоп","phone":"74004004400",
                         "email":"karp@mail.ru","addressRegistered":"г.Майкоп","addressLife":"г.Майкоп"}]
-                        """));
+                        """, false));
     }
 
     @Test
     @Sql("/sql/accounts_insert.sql")
     void findAccountByAccountParamReturnIterableAccountEmpty() throws Exception {
         var requestBuilder = MockMvcRequestBuilders.get("/customer-api/accounts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {"lastName": "XXX", "firstName": "XXX"}
-                        """);
+                .param("lastName", "XXX")
+                .param("firstName", "XXX");
         this.mockMvc.perform(requestBuilder)
                 .andDo(print())
                 .andExpect(status().isOk())

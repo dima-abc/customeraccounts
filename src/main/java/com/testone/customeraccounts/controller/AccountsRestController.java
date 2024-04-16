@@ -4,7 +4,6 @@ import com.testone.customeraccounts.controller.payload.NewAccountPayload;
 import com.testone.customeraccounts.entity.Account;
 import com.testone.customeraccounts.service.AccountService;
 import com.testone.customeraccounts.service.model.AccountMapper;
-import com.testone.customeraccounts.service.model.FindAccountParam;
 import com.testone.customeraccounts.validator.PayloadValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -25,8 +24,8 @@ public class AccountsRestController {
     private static final String X_SOURCE = "x-Source";
 
     @GetMapping()
-    public Iterable<Account> findAccountByAccountParam(@RequestBody(required = false) FindAccountParam accountParam) {
-        if (accountParam == null) {
+    public Iterable<Account> findAccountByAccountParam(@RequestParam(required = false) Map<String, String> accountParam) {
+        if (accountParam.isEmpty()) {
             throw new NoSuchElementException("Поиск осуществляется при наличии хотя бы одного поля.");
         }
         return accountService.findAccountByAccountParam(accountParam);

@@ -2,11 +2,11 @@ package com.testone.customeraccounts.service;
 
 import com.testone.customeraccounts.entity.Account;
 import com.testone.customeraccounts.repository.AccountRepository;
-import com.testone.customeraccounts.service.model.FindAccountParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -26,13 +26,13 @@ public class ImplAccountService implements AccountService {
     }
 
     @Override
-    public Iterable<Account> findAccountByAccountParam(FindAccountParam findAccountParam) {
+    public Iterable<Account> findAccountByAccountParam(Map<String, String> findAccountParam) {
         return accountRepository
                 .findAccountByLastNameOrFirstNameOrMiddleNameOrPhoneOrEmail(
-                        findAccountParam.getLastName(),
-                        findAccountParam.getFirstName(),
-                        findAccountParam.getMiddleName(),
-                        findAccountParam.getPhone(),
-                        findAccountParam.getEmail());
+                        findAccountParam.get("lastName"),
+                        findAccountParam.get("firstName"),
+                        findAccountParam.get("middleName"),
+                        findAccountParam.get("phone"),
+                        findAccountParam.get("email"));
     }
 }

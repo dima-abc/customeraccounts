@@ -2,7 +2,6 @@ package com.testone.customeraccounts.service;
 
 import com.testone.customeraccounts.entity.Account;
 import com.testone.customeraccounts.repository.AccountRepository;
-import com.testone.customeraccounts.service.model.FindAccountParam;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.LongStream;
 
@@ -78,9 +78,6 @@ class ImplAccountServiceTest {
 
     @Test
     void findAccountByIdThenReturnEmptyOptional() {
-        Account account = new Account(id, bankId, lastName, firstName,
-                middleName, birthDate, passport, placeBirth,
-                phone, email, addressRegistered, addressLife);
         Optional<Account> result = this.service.findAccountById(id);
 
         assertNotNull(result);
@@ -96,8 +93,12 @@ class ImplAccountServiceTest {
                         middleName + i, birthDate, passport, placeBirth,
                         phone + i, email + i, addressRegistered, addressLife))
                 .toList();
-        FindAccountParam findAccountParam = new FindAccountParam(lastName + 1L, firstName + 2L,
-                middleName + 3L, phone + 4l, email + 5L);
+        Map<String, String> findAccountParam = Map.of(
+                "lastName", lastName + 1L,
+                "firstName", firstName + 2L,
+                "middleName", middleName + 3L,
+                "phone", phone + 4L,
+                "email", email + 5l);
         doReturn(accounts).when(this.accountRepository)
                 .findAccountByLastNameOrFirstNameOrMiddleNameOrPhoneOrEmail(
                         lastName + 1L, firstName + 2L,
@@ -115,7 +116,7 @@ class ImplAccountServiceTest {
 
     @Test
     void findAccountByAccountParamThenReturnIterableAccountEmpty() {
-        FindAccountParam findAccountParam = new FindAccountParam();
+        Map<String, String> findAccountParam = Map.of();
 
         Iterable<Account> result = this.service.findAccountByAccountParam(findAccountParam);
 
