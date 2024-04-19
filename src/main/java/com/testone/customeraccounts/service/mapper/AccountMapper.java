@@ -1,4 +1,4 @@
-package com.testone.customeraccounts.service.model;
+package com.testone.customeraccounts.service.mapper;
 
 import com.testone.customeraccounts.controller.payload.NewAccountPayload;
 import com.testone.customeraccounts.entity.Account;
@@ -12,7 +12,7 @@ public class AccountMapper {
             return null;
         }
         LocalDate birthDate = newAccountPayload.getBirthDate() != null ? mapToLocalDate(newAccountPayload.getBirthDate()) : null;
-        Account account = Account.of()
+        return Account.of()
                 .bankId(newAccountPayload.getBankId())
                 .lastName(newAccountPayload.getLastName())
                 .firstName(newAccountPayload.getFirstName())
@@ -25,7 +25,6 @@ public class AccountMapper {
                 .addressRegistered(newAccountPayload.getAddressRegistered())
                 .addressLife(newAccountPayload.getAddressLife())
                 .build();
-        return account;
     }
 
     private static LocalDate mapToLocalDate(String localDate) {

@@ -1,124 +1,98 @@
 package com.testone.customeraccounts.validator;
 
 import com.testone.customeraccounts.controller.payload.NewAccountPayload;
-import jakarta.validation.ConstraintViolationException;
+import com.testone.customeraccounts.entity.Platform;
+import com.testone.customeraccounts.service.PlatformService;
 import org.junit.jupiter.api.Test;
+import org.springframework.validation.BindingResult;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 class PayloadValidatorTest {
-    private PayloadValidator payloadValidator = new PayloadValidator();
+    PlatformService platformService = mock(PlatformService.class);
     private static final String HEADER_MAIL = "mail";
     private static final String HEADER_MOBILE = "mobile";
     private static final String HEADER_BANK = "bank";
     private static final String HEADER_GOSUSLUGI = "gosuslugi";
 
     @Test
-    void isValidThenReturnNoSuchElementException() {
-        String badHeader = "badHeader";
-        String message = "Заголовок %s не найден".formatted(badHeader);
-
-        assertThatThrownBy(() -> payloadValidator.isValid(badHeader, new NewAccountPayload()))
-                .isInstanceOf(NoSuchElementException.class)
-                .hasMessageContaining(message);
-    }
-
-    @Test
-    void isValidHeaderMailThenReturnExceptionNotNullFirstNameAndMail() {
-        NewAccountPayload newAccountPayload = new NewAccountPayload();
-        String messageFirsName = "Поле firstName обязательное.";
-        String messageEmail = "Поле email обязательное.";
-        assertThatThrownBy(() -> payloadValidator.isValid(HEADER_MAIL, newAccountPayload))
-                .isInstanceOf(ConstraintViolationException.class)
-                .hasMessageContaining(messageFirsName)
-                .hasMessageContaining(messageEmail);
-    }
-
-    @Test
-    void isValidHeaderMailThenReturnExceptionNotNullFirstName() {
-        NewAccountPayload newAccountPayload = NewAccountPayload.of()
-                .phone("79002003040")
+    public void test_valid_header_and_valid_payload() {
+        Platform platform = Platform.of()
+                .id(1L)
+                .platformName(HEADER_MAIL)
+                .bankId(true)
+                .firstName(true)
+                .lastName(true)
                 .build();
-        String messageFirsName = "Поле firstName обязательное.";
-        assertThatThrownBy(() -> payloadValidator.isValid(HEADER_MAIL, newAccountPayload))
-                .isInstanceOf(ConstraintViolationException.class)
-                .hasMessageContaining(messageFirsName);
-    }
-
-    @Test
-    void isValidHeaderMailThenReturnExceptionNotNullMail() {
-        NewAccountPayload newAccountPayload = new NewAccountPayload();
-        String messageEmail = "Поле email обязательное.";
-        assertThatThrownBy(() -> payloadValidator.isValid(HEADER_MAIL, newAccountPayload))
-                .isInstanceOf(ConstraintViolationException.class)
-                .hasMessageContaining(messageEmail);
-    }
-
-    @Test
-    void isValidHeaderMobileThenReturnExceptionNotNullPhone() {
-        NewAccountPayload newAccountPayload = new NewAccountPayload();
-        String messagePhone = "Поле phone обязательное и должно соответствовать формату 7XXXXXXXXXX";
-        assertThatThrownBy(() -> payloadValidator.isValid(HEADER_MOBILE, newAccountPayload))
-                .isInstanceOf(ConstraintViolationException.class)
-                .hasMessageContaining(messagePhone);
-    }
-
-    @Test
-    void isValidHeaderMobileThenReturnExceptionNotNullPhoneIsNoFormat() {
-        NewAccountPayload newAccountPayload = NewAccountPayload.of()
-                .phone("12341234567")
+        doReturn(Optional.of(platform))
+                .when(platformService)
+                .findPlatformByName(HEADER_MAIL);
+        PayloadValidator payloadValidator = new PayloadValidator(platformService);
+        NewAccountPayload payload = NewAccountPayload.of()
+                .bankId(1234L)
+                .firstName("Petr")
+                .lastName("Vasin")
+                .email("vasin@email.com")
                 .build();
-        String messagePhone = "Поле phone обязательное и должно соответствовать формату 7XXXXXXXXXX";
-        assertThatThrownBy(() -> payloadValidator.isValid(HEADER_MOBILE, newAccountPayload))
-                .isInstanceOf(ConstraintViolationException.class)
-                .hasMessageContaining(messagePhone);
+        BindingResult result = payloadValidator.isValid(HEADER_MAIL, payload);
+        assertFalse(result.hasErrors());
     }
 
     @Test
-    void isValidHeaderBankThenReturnExceptionNotNullValidFiledBank() {
-        NewAccountPayload newAccountPayload = new NewAccountPayload();
-        String messageBankId = "Поле bankId обязательное.";
-        String messageFirstName = "Поле firstName обязательное.";
-        String messageLastName = "Поле lastName обязательное.";
-        String messageMiddleName = "Поле middleName обязательное.";
-        String messageBirthDate = "Поле birthDate обязательное и должно соответствовать формату dd-MM-yyyy";
-        String messagePassport = "Поле passport обязательное и должно соответствовать формату XXXX XXXXXX";
-        assertThatThrownBy(() -> payloadValidator.isValid(HEADER_BANK, newAccountPayload))
-                .isInstanceOf(ConstraintViolationException.class)
-                .hasMessageContaining(messageBankId)
-                .hasMessageContaining(messageFirstName)
-                .hasMessageContaining(messageLastName)
-                .hasMessageContaining(messageMiddleName)
-                .hasMessageContaining(messageBirthDate)
-                .hasMessageContaining(messagePassport);
+    public void test_valid_header_and_invalid_payload() {
+        Platform platform = Platform.of()
+                .platformName(HEADER_BANK)
+                .firstName(true)
+                .lastName(true)
+                .build();
+        doReturn(Optional.of(platform))
+                .when(platformService)
+                .findPlatformByName(HEADER_BANK);
+        PayloadValidator payloadValidator = new PayloadValidator(platformService);
+        NewAccountPayload payload = NewAccountPayload.of()
+                .firstName("John")
+                .lastName("")
+                .build();
+        BindingResult result = payloadValidator.isValid(HEADER_BANK, payload);
+        assertTrue(result.hasErrors());
     }
 
     @Test
-    void isValidHeaderGosuslugiThenReturnExceptionNotNullValidFiledGosuslugi() {
-        NewAccountPayload newAccountPayload = new NewAccountPayload();
-        String messageBankId = "Поле bankId обязательное.";
-        String messageFirstName = "Поле firstName обязательное.";
-        String messageLastName = "Поле lastName обязательное.";
-        String messageMiddleName = "Поле middleName обязательное.";
-        String messageBirthDate = "Поле birthDate обязательное и должно соответствовать формату dd-MM-yyyy";
-        String messagePassport = "Поле passport обязательное и должно соответствовать формату XXXX XXXXXX";
-        String messagePlaceBirth = "Поле placeBirth обязательное.";
-        String messagePhone = "Поле phone обязательное и должно соответствовать формату 7XXXXXXXXXX";
-        String messageAddressRegistered = "Поле addressRegistered обязательное.";
-        assertThatThrownBy(() -> payloadValidator.isValid(HEADER_GOSUSLUGI, newAccountPayload))
-                .isInstanceOf(ConstraintViolationException.class)
-                .hasMessageContaining(messageBankId)
-                .hasMessageContaining(messageFirstName)
-                .hasMessageContaining(messageLastName)
-                .hasMessageContaining(messageMiddleName)
-                .hasMessageContaining(messageBirthDate)
-                .hasMessageContaining(messagePassport)
-                .hasMessageContaining(messagePlaceBirth)
-                .hasMessageContaining(messagePhone)
-                .hasMessageContaining(messageAddressRegistered);
+    public void test_valid_header_and_payload_with_required_fields() {
+        Platform platform = Platform.of()
+                .platformName(HEADER_GOSUSLUGI)
+                .bankId(true)
+                .firstName(true)
+                .lastName(true)
+                .build();
+        doReturn(Optional.of(platform))
+                .when(platformService)
+                .findPlatformByName(HEADER_GOSUSLUGI);
+        PayloadValidator payloadValidator = new PayloadValidator(platformService);
+        NewAccountPayload payload = NewAccountPayload.of()
+                .bankId(1234L)
+                .firstName("John")
+                .lastName("Doe")
+                .build();
+        BindingResult result = payloadValidator.isValid(HEADER_GOSUSLUGI, payload);
+        assertFalse(result.hasErrors());
     }
 
+    @Test
+    public void test_valid_header_with_required_no_such_element_exception() {
+        PayloadValidator payloadValidator = new PayloadValidator(platformService);
+        NewAccountPayload payload = NewAccountPayload.of()
+                .bankId(1234L)
+                .firstName("John")
+                .lastName("Doe")
+                .build();
+        assertThrows(NoSuchElementException.class,
+                () -> payloadValidator.isValid(HEADER_GOSUSLUGI, payload));
+    }
 
 }

@@ -1,32 +1,31 @@
 package com.testone.customeraccounts.validator;
 
 import com.testone.customeraccounts.controller.payload.NewAccountPayload;
-import jakarta.validation.*;
-import org.hibernate.validator.HibernateValidator;
+import com.testone.customeraccounts.entity.Platform;
+import com.testone.customeraccounts.service.PlatformService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.DataBinder;
 
-import java.util.Arrays;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 @Component
+@RequiredArgsConstructor
 public class PayloadValidator {
+    private final PlatformService platformService;
 
-    public void isValid(String header, NewAccountPayload payload) {
-        Class<?> validGroup = Arrays.stream(HeaderValidGroup.class.getClasses())
-                .filter(c -> c.getSimpleName().equalsIgnoreCase(header))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("Заголовок %s не найден".formatted(header)));
-        Set<ConstraintViolation<NewAccountPayload>> violations = getValidator().validate(payload, validGroup);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
-        }
+    public Platform getPlatform(String header) {
+        return platformService.findPlatformByName(header)
+                .orElseThrow(() -> new NoSuchElementException("customer.errors.platform.not_found"));
     }
 
-    private Validator getValidator() {
-        ValidatorFactory validatorFactory = Validation.byProvider(HibernateValidator.class)
-                .configure()
-                .buildValidatorFactory();
-        return validatorFactory.getValidator();
+    public BindingResult isValid(String header, NewAccountPayload payload) {
+        final Platform platform = getPlatform(header);
+        final AccountValidator validator = new AccountValidator(platform);
+        final DataBinder dataBinder = new DataBinder(payload);
+        dataBinder.addValidators(validator);
+        dataBinder.validate();
+        return dataBinder.getBindingResult();
     }
 }

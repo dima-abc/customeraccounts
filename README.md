@@ -17,6 +17,8 @@
 
 ### Основные ссылки
 
+#### Работа с учетной записью
+
 GET запрос поиск учетных записей по полям <br>
 Обрабатываемые параметры: <br>
 
@@ -55,7 +57,46 @@ POST запрос создание учетной записи <br>
 
 --- 
 
+#### Работа с платформами
 
+* GET запрос поиск платформы по ID <br>
+[/customer-api/platforms/{platformId}](http://localhost:8081/customer-api/platforms/1) <br>
+* GET запрос поиска учетной записи по имени не строгий, request param p-name. <br>
+[/customer-api/platforms](http://localhost:8081/customer-api/platforms?p-name=mail) <br>
+* POST запрос создание платформы <br>
+[/customer-api/platforms](http://localhost:8081/customer-api/platforms) <br>
+{
+  "platformName": "string", <br>
+  "bankId": true, <br>
+  "lastName": true, <br> 
+  "firstName": true, <br>
+  "middleName": true, <br>
+  "birthDate": true, <br>
+  "passport": true, <br>
+  "placeBirth": true, <br>
+  "phone": true, <br>
+  "email": true, <br>
+  "addressRegistered": true, <br>
+  "addressLife": true <br>
+}
+* PUT запрос обновления платформы <br>
+[/customer-api/platforms/{platformId}](http://localhost:8081/customer-api/platforms/1L)
+{
+  "platformName": "string", <br>
+  "bankId": true, <br>
+  "lastName": true, <br>
+  "firstName": true, <br>
+  "middleName": true, <br>
+  "birthDate": true, <br>
+  "passport": true, <br>
+  "placeBirth": true, <br>
+  "phone": true, <br>
+  "email": true, <br>
+  "addressRegistered": true, <br>
+  "addressLife": true <br>
+}
+* DELETE запрос удаления платформы <br>
+[/customer-api/platforms/{platformId}](http://localhost:8081/customer-api/platforms/1L)
 
 ---
 

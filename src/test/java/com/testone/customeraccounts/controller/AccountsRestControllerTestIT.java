@@ -105,7 +105,7 @@ public class AccountsRestControllerTestIT {
                 .andExpect(content().json("""
                         {"type":"about:blank","title":"Bad Request",
                         "status":400,
-                        "detail":"email: Поле email обязательное.",
+                        "detail":"Запрос содержит ошибки",
                         "instance":"/customer-api/accounts"}
                         """));
     }

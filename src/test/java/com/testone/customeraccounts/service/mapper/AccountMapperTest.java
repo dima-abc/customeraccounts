@@ -1,4 +1,4 @@
-package com.testone.customeraccounts.service.model;
+package com.testone.customeraccounts.service.mapper;
 
 import com.testone.customeraccounts.controller.payload.NewAccountPayload;
 import com.testone.customeraccounts.entity.Account;

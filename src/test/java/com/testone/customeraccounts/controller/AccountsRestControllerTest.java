@@ -2,10 +2,11 @@ package com.testone.customeraccounts.controller;
 
 import com.testone.customeraccounts.controller.payload.NewAccountPayload;
 import com.testone.customeraccounts.entity.Account;
+import com.testone.customeraccounts.entity.Platform;
 import com.testone.customeraccounts.service.AccountService;
-import com.testone.customeraccounts.service.model.AccountMapper;
+import com.testone.customeraccounts.service.PlatformService;
+import com.testone.customeraccounts.service.mapper.AccountMapper;
 import com.testone.customeraccounts.validator.PayloadValidator;
-import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,12 +15,14 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -30,9 +33,9 @@ import static org.mockito.Mockito.*;
 class AccountsRestControllerTest {
     @Mock
     AccountService accountService;
+    PlatformService platformService = mock(PlatformService.class);
     @Spy
-    PayloadValidator payloadValidator = new PayloadValidator();
-
+    PayloadValidator payloadValidator = new PayloadValidator(platformService);
     @InjectMocks()
     AccountsRestController controller;
 
@@ -47,7 +50,7 @@ class AccountsRestControllerTest {
                 "lastName", "Petrov",
                 "firstName", "Ivan");
         Account account1 = Account.of()
-                .id(1l)
+                .id(1L)
                 .lastName("Petrov")
                 .firstName("Petr")
                 .build();
@@ -75,15 +78,20 @@ class AccountsRestControllerTest {
 
     @Test
     void findAccountByAccountParamThenReturnNoSuchException() {
-        String messageError = "Поиск осуществляется при наличии хотя бы одного поля.";
+        String messageError = "customer.errors.account.find_param";
         assertThatThrownBy(() -> this.controller.findAccountByAccountParam(Map.of()))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessageContaining(messageError);
     }
 
     @Test
-    void createAccountThenRequestValidReturnNewContent() {
+    void createAccountThenRequestValidReturnNewContent() throws BindException {
         String headerValue = "mail";
+        Platform platform = Platform.of()
+                .platformName(headerValue)
+                .firstName(true)
+                .email(true)
+                .build();
         NewAccountPayload payload = NewAccountPayload.of()
                 .firstName("Ivan")
                 .email("ivan@mail.ru")
@@ -95,6 +103,8 @@ class AccountsRestControllerTest {
                 .email("ivan@mail.ru")
                 .build();
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString("http://localhost");
+        doReturn(Optional.of(platform)).when(platformService)
+                .findPlatformByName(headerValue);
         doReturn(account).when(this.accountService)
                 .createAccount(accountNew);
         ResponseEntity<?> result = this.controller.createAccount(headerValue, payload, uriComponentsBuilder);
@@ -112,13 +122,20 @@ class AccountsRestControllerTest {
     @Test
     void createAccount_RequestIsInvalid_ReturnBadRequest() {
         String headerValue = "mail";
+        Platform platform = Platform.of()
+                .platformName(headerValue)
+                .firstName(true)
+                .email(true)
+                .build();
         NewAccountPayload payload = NewAccountPayload.of()
                 .firstName("Ivan")
                 .build();
-        String messageError = "Поле email обязательное.";
+        doReturn(Optional.of(platform)).when(platformService)
+                .findPlatformByName(headerValue);
+        String messageError = "customer.errors.account.email";
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString("http://localhost");
         assertThatThrownBy(() -> this.controller.createAccount(headerValue, payload, uriComponentsBuilder))
-                .isInstanceOf(ConstraintViolationException.class)
+                .isInstanceOf(BindException.class)
                 .hasMessageContaining(messageError);
         verifyNoInteractions(accountService);
     }
